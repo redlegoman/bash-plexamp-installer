@@ -42,7 +42,11 @@ USER="dietpi"
 else
 USER="pi"
 fi
-TIMEZONE="America/Chicago"                      # Default Timezone
+TIMEZONE=$(timedatectl show -p Timezone|awk -F"=" '{print $2}')
+if [[ ${TIMEZONE} == "" ]]
+then
+  TIMEZONE="America/Chicago"                      # Default Timezone
+fi
 PASSWORD="MySecretPass123"                      # Default password
 CNFFILE="/boot/config.txt"                      # Default config file
 HOST="plexamp"                                  # Default hostname
@@ -98,9 +102,10 @@ if [ ! -f /boot/dietpi.txt ]; then
 echo "Now it is time to choose Timezone, pick the number for the Timezone you want, exit with 5."
 echo "If your Timezone is not covered, additional timezones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
 echo " "
+echo "Your current timezone is set to ${TIMEZONE}"
 title="Select your Timezone:"
 prompt="Pick your option:"
-options=("Eastern time zone: America/New_York" "Central time zone: America/Chicago" "Mountain time zone: America/Denver" "Pacific time zone: America/Los_Angeles")
+options=("Current timezone: ${TIMEZONE}" "Eastern time zone: America/New_York" "Central time zone: America/Chicago" "Mountain time zone: America/Denver" "Pacific time zone: America/Los_Angeles")
 echo "$title"
 PS3="$prompt "
 select opt in "${options[@]}" "Quit"; do
