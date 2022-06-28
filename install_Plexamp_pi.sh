@@ -38,18 +38,17 @@
 #####
 
 if [ -d /home/dietpi ]; then # Name of user to create and run PlexAmp as.
-USER="dietpi"
-else
-USER="pi"
+  USER="dietpi"
+  else
+  USER="andy"
 fi
 TIMEZONE=$(timedatectl show -p Timezone|awk -F"=" '{print $2}')
-if [[ ${TIMEZONE} == "" ]]
-then
+if [[ ${TIMEZONE} == "" ]] ; then
   TIMEZONE="America/Chicago"                      # Default Timezone
 fi
 PASSWORD="MySecretPass123"                      # Default password
 CNFFILE="/boot/config.txt"                      # Default config file
-HOST="plexamp"                                  # Default hostname
+HOST="plexamppi"                                  # Default hostname
 PLEXAMPV="Plexamp-Linux-arm64-v4.2.2"    # Default Plexamp-version
 SPACES="   "                                    # Default spaces
 
@@ -71,65 +70,66 @@ echo    "      If you do not have one, you can also dedicate audio to the HDMI p
 echo " "
 echo " "
 echo "--== Starting Installation ==--"
-echo -n "Do you want to change hostname [y/N]: "
-read answer
-answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
-if [ "$answer" = "y" ]; then
-echo " "
-echo    "      To change hostname a second time, please reboot first!"
-echo " "
-read -e -p "Hostname for your Raspberry Pi (default is $HOST): " -i "$HOST" HOST
-sed -i "s/$HOSTNAME/$HOST/g" /etc/hostname
-sed -i "s/$HOSTNAME/$HOST/g" /etc/hosts
-if [ -f /boot/dietpi.txt ]; then
-sed -i "s/AUTO_SETUP_NET_HOSTNAME=.*/AUTO_SETUP_NET_HOSTNAME=$HOST/g" /boot/dietpi.txt
-fi
-fi
+#echo -n "Do you want to change hostname [y/N]: "
+#read answer
+#answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+#if [ "$answer" = "y" ]; then
+#echo " "
+#echo    "      To change hostname a second time, please reboot first!"
+#echo " "
+#read -e -p "Hostname for your Raspberry Pi (default is $HOST): " -i "$HOST" HOST
+#sed -i "s/$HOSTNAME/$HOST/g" /etc/hostname
+#sed -i "s/$HOSTNAME/$HOST/g" /etc/hosts
+#if [ -f /boot/dietpi.txt ]; then
+#sed -i "s/AUTO_SETUP_NET_HOSTNAME=.*/AUTO_SETUP_NET_HOSTNAME=$HOST/g" /boot/dietpi.txt
+#fi
+#fi
 echo " "
 echo -e "By default, installation will progress as user $USER, unless you choose to create/change to a diferent user."
 echo " "
 echo -n "Do you want to create or change to a new or different user for the install (currently "$USER") [y/N]: "
-read answer
+#read answer
 answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+answer=n
 if [ "$answer" = "y" ]; then
-echo " "
-read -e -p "User to create/use and install PlexAmp under (default is $USER): " -i "$USER" USER
-echo " "
-read -e -p "Password for user to create and install PlexAmp under (will not change if user already exist): " -i "$PASSWORD" PASSWORD
-PASSWORDCRYPTED=$(echo "$PASSWORD" | openssl passwd -6 -stdin)
+  echo " "
+  read -e -p "User to create/use and install PlexAmp under (default is $USER): " -i "$USER" USER
+  echo " "
+  read -e -p "Password for user to create and install PlexAmp under (will not change if user already exist): " -i "$PASSWORD" PASSWORD
+  PASSWORDCRYPTED=$(echo "$PASSWORD" | openssl passwd -6 -stdin)
 fi
-if [ ! -f /boot/dietpi.txt ]; then
-echo "Now it is time to choose Timezone, pick the number for the Timezone you want, exit with 5."
-echo "If your Timezone is not covered, additional timezones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
-echo " "
-echo "Your current timezone is set to ${TIMEZONE}"
-title="Select your Timezone:"
-prompt="Pick your option:"
-options=("Current timezone: ${TIMEZONE}" "Eastern time zone: America/New_York" "Central time zone: America/Chicago" "Mountain time zone: America/Denver" "Pacific time zone: America/Los_Angeles")
-echo "$title"
-PS3="$prompt "
-select opt in "${options[@]}" "Quit"; do
-    case "$REPLY" in
-    1 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/New_York";;
-    2 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Chicago";;
-    3 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Denver";;
-    4 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Los_Angeles";;
-    $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
-    *) echo "Invalid option. Try another one."; continue;;
-    esac
-done
-echo " "
-read -e -p "Timezone to set on Pi (chosen Timezone is $TIMEZONE, change if needed): " -i "$TIMEZONE" TIMEZONE
-fi
+#if [ ! -f /boot/dietpi.txt ]; then
+#  echo "Now it is time to choose Timezone, pick the number for the Timezone you want, exit with 5."
+#  echo "If your Timezone is not covered, additional timezones can be found here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+#  echo " "
+#  echo "Your current timezone is set to ${TIMEZONE}"
+#  title="Select your Timezone:"
+#  prompt="Pick your option:"
+#  options=("Current timezone: ${TIMEZONE}" "Eastern time zone: America/New_York" "Central time zone: America/Chicago" "Mountain time zone: America/Denver" "Pacific time zone: America/Los_Angeles")
+#  echo "$title"
+#  PS3="$prompt "
+#  select opt in "${options[@]}" "Quit"; do
+#      case "$REPLY" in
+#      1 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/New_York";;
+#      2 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Chicago";;
+#      3 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Denver";;
+#      4 ) echo "You picked $opt, continue with 5 or choose again!"; TIMEZONE="America/Los_Angeles";;
+#      $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
+#      *) echo "Invalid option. Try another one."; continue;;
+#      esac
+#  done
+#  echo " "
+#  read -e -p "Timezone to set on Pi (chosen Timezone is $TIMEZONE, change if needed): " -i "$TIMEZONE" TIMEZONE
+#fi
 
 #####
 # start main script execution
 #####
 echo " "
-if [ ! -f /boot/dietpi.txt ]; then
-echo "--== Setting timezone ==--"
-timedatectl set-timezone "$TIMEZONE"
-fi
+#if [ ! -f /boot/dietpi.txt ]; then
+#  echo "--== Setting timezone ==--"
+#  timedatectl set-timezone "$TIMEZONE"
+#fi
 echo " "
 echo "--== Date of execution ==--"
 date
@@ -137,90 +137,90 @@ echo " "
 echo "--== Check OS version ==--"
 cat /etc/os-release
 if [ ! -f /boot/dietpi.txt ]; then
-echo " "
-echo "--== Verify Hostname and OS ==--"
-hostnamectl
+  echo " "
+  echo "--== Verify Hostname and OS ==--"
+  hostnamectl
 else
-echo "--== Verify Hostname ==--"
-cat /etc/hostname
+  echo "--== Verify Hostname ==--"
+  cat /etc/hostname
 fi
-echo " "
-echo "--== Verify Partitioning ==--"
-lsblk
-echo " "
-echo "--== Verify RAM ==--"
-free -m
-echo " "
-echo "--== Verify CPUs ==--"
-lscpu
-echo " "
-if [ -f /boot/dietpi.txt ]; then
-echo "--== Verify alsa-utils installed ==--"
-apt-get -y install alsa-utils > /dev/null 2>&1
-echo " "
-fi
-echo "--== Verify Audio HW, list all soundcards and digital audio devices ==--"
-aplay -l
-echo " "
-echo "--== Verify Audio HW, list all PCMs defined ==--"
-aplay -L
-echo " "
-if [ ! -f /boot/dietpi.txt ]; then
-echo "--== Setting NTP-servers ==--"
-sed -ri 's/^#NTP=*/NTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org/' /etc/systemd/timesyncd.conf
-echo " "
-echo "--== Verify timezone-setup and NTP-sync ==--"
-timedatectl
-echo " "
-fi
-echo "--== Install rpi-eeprom service ==--"
-apt-get install -y rpi-eeprom
-echo " "
-echo "--== Run the rpi-eeprom-update to check if update is required ==--"
-rpi-eeprom-update
-echo " "
-echo "--== Reading EEPROM version ==--"
-vcgencmd bootloader_version
-echo " "
-echo "--== Checking the rpi-eeprom service ==--"
-systemctl status rpi-eeprom-update.service
-echo " "
-echo -n "Do you want to install and set vim as your default editor [y/N]: "
-read answer
-answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
-if [ "$answer" = "y" ]; then
-echo " "
-echo "--== Install vim and change to default editor ==--"
-apt-get install -y vim > /dev/null 2>&1
-update-alternatives --set editor /usr/bin/vim.basic
-fi
-echo " "
-if [ ! -f /boot/dietpi.txt ]; then
-echo -n "Do you want to disable IPv6 [y/N]: "
-read answer
-answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
-if [ "$answer" = "y" ]; then
-echo " "
-echo "--== Disable IPv6 ==--"
-if [ ! -f /etc/sysctl.d/disable-ipv6.conf ]; then
-cat >> /etc/sysctl.d/disable-ipv6.conf << EOF
-net.ipv6.conf.all.disable_ipv6 = 1
-EOF
-fi
-fi
-fi
+  echo " "
+  echo "--== Verify Partitioning ==--"
+  lsblk
+  echo " "
+  echo "--== Verify RAM ==--"
+  free -m
+  echo " "
+  echo "--== Verify CPUs ==--"
+  lscpu
+  echo " "
+  if [ -f /boot/dietpi.txt ]; then
+    echo "--== Verify alsa-utils installed ==--"
+    apt-get -y install alsa-utils > /dev/null 2>&1
+    echo " "
+  fi
+  echo "--== Verify Audio HW, list all soundcards and digital audio devices ==--"
+  aplay -l
+  echo " "
+  echo "--== Verify Audio HW, list all PCMs defined ==--"
+  aplay -L
+  echo " "
+#  if [ ! -f /boot/dietpi.txt ]; then
+#    echo "--== Setting NTP-servers ==--"
+#    sed -ri 's/^#NTP=*/NTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org/' /etc/systemd/timesyncd.conf
+#    echo " "
+#    echo "--== Verify timezone-setup and NTP-sync ==--"
+#    timedatectl
+#    echo " "
+#  fi
+  echo "--== Install rpi-eeprom service ==--"
+  apt-get install -y rpi-eeprom
+  echo " "
+  echo "--== Run the rpi-eeprom-update to check if update is required ==--"
+  rpi-eeprom-update
+  echo " "
+  echo "--== Reading EEPROM version ==--"
+  vcgencmd bootloader_version
+  echo " "
+  echo "--== Checking the rpi-eeprom service ==--"
+  systemctl status rpi-eeprom-update.service
+  echo " "
+#  echo -n "Do you want to install and set vim as your default editor [y/N]: "
+#  read answer
+#  answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+#  if [ "$answer" = "y" ]; then
+#    echo " "
+#    echo "--== Install vim and change to default editor ==--"
+#    apt-get install -y vim > /dev/null 2>&1
+#    update-alternatives --set editor /usr/bin/vim.basic
+#  fi
+  echo " "
+#  if [ ! -f /boot/dietpi.txt ]; then
+#    echo -n "Do you want to disable IPv6 [y/N]: "
+#    read answer
+#    answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+#    if [ "$answer" = "y" ]; then
+#      echo " "
+#      echo "--== Disable IPv6 ==--"
+#      if [ ! -f /etc/sysctl.d/disable-ipv6.conf ]; then
+#      cat >> /etc/sysctl.d/disable-ipv6.conf << EOF
+#      net.ipv6.conf.all.disable_ipv6 = 1
+#EOF
+#    fi
+#  fi
+#fi
 if [ ! -d /home/"$USER" ]; then
-echo " "
-echo "--== Add user and enable sudo ==--"
-useradd -m -p "$PASSWORDCRYPTED" "$USER"
-usermod --shell /bin/bash "$USER" > /dev/null 2>&1
-usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,lpadmin,spi,i2c,gpio "$USER"
-if [ -d /home/pi ]; then
-echo " "
-echo "--== Disable default user "pi" from logging in ==--"
-usermod -s /sbin/nologin pi
-passwd -d pi
-fi
+  echo " "
+  echo "--== Add user and enable sudo ==--"
+  useradd -m -p "$PASSWORDCRYPTED" "$USER"
+  usermod --shell /bin/bash "$USER" > /dev/null 2>&1
+  usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,lpadmin,spi,i2c,gpio "$USER"
+  if [ -d /home/pi ]; then
+    echo " "
+    echo "--== Disable default user "pi" from logging in ==--"
+    usermod -s /sbin/nologin pi
+    passwd -d pi
+  fi
 fi
 echo " "
 echo "--== Set user-groups and enable sudo ==--"
@@ -228,33 +228,33 @@ usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,
 echo " "
 echo "--== Update motd ==--"
 if [ ! -f /etc/update-motd.d/20-logo ]; then
-cat >> /etc/update-motd.d/20-logo << 'EOF'
-#!/bin/sh
-echo    ""
-echo    ""
-echo    "   ██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ███╗   ███╗██████╗"
-echo    "   ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗████╗ ████║██╔══██╗"
-echo    "   ██████╔╝██║     █████╗   ╚███╔╝ ███████║██╔████╔██║██████╔"
-echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██║╚██╔╝██║██╔═══╝"
-echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
-echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
-echo    ""
-echo    "   Plexamp-Linux-arm64-v4.2.2"
-echo " "
+  cat >> /etc/update-motd.d/20-logo << 'EOF'
+  #!/bin/sh
+  echo    ""
+  echo    ""
+  echo    "   ██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ███╗   ███╗██████╗"
+  echo    "   ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗████╗ ████║██╔══██╗"
+  echo    "   ██████╔╝██║     █████╗   ╚███╔╝ ███████║██╔████╔██║██████╔"
+  echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██║╚██╔╝██║██╔═══╝"
+  echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
+  echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
+  echo    ""
+  echo    "   Plexamp-Linux-arm64-v4.2.2"
+  echo " "
 EOF
-chmod +x /etc/update-motd.d/20-logo
+  chmod +x /etc/update-motd.d/20-logo
 fi
 echo " "
 if [ ! -f /boot/dietpi.txt ]; then
-echo "--== Check WiFi-status and enable WiFi ==--"
-echo " "
-echo "--== Before ==--"
-rfkill list all
-rfkill unblock 0
-echo " "
-echo "--== After ==--"
-rfkill list all
-echo " "
+  echo "--== Check WiFi-status and enable WiFi ==--"
+  echo " "
+  echo "--== Before ==--"
+  rfkill list all
+  rfkill unblock 0
+  echo " "
+  echo "--== After ==--"
+  rfkill list all
+  echo " "
 fi
 echo "--== Fix HiFiBerry setup ==--"
 echo -e "$INFO Configuring overlay for HifiBerry HATs (or clones):"
@@ -267,82 +267,85 @@ echo    "      Information about the HifiBerry cards can be found at https://www
 echo    "      Configuration for the HifiBerry cards can be found at https://www.hifiberry.com/docs/software/configuring-linux-3-18-x/"
 echo
 echo -n "Do you want to configure your HifiBerry HAT (or clone) [y/N]: "
-read answer
+#read answer
 answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+answer=y
 if [ "$answer" = "y" ]; then
-echo " "
-echo "Now you need to choose your HiFiBerry card, pick the number for the card you have, exit with 5."
-sed -i /hifiberry-/d /boot/config.txt # Remove existing hiFiBerry config.
-echo " " >> /boot/config.txt
-grep -qxF '# --== Configuration for HiFi-Berry ==--' /boot/config.txt || echo '# --== Configuration for HiFi-Berry ==--' >> /boot/config.txt
-echo " " >> /boot/config.txt
-echo " "
-title="Select your HiFiBerry card, exit with 5:"
-prompt="Pick your option:"
-options=("setup for DAC+ standard/pro" "setup for DAC/DAC+ Light" "setup for Digi/Digi+" "setup for Amp/Amp+")
-echo "$title"
-PS3="$prompt "
-select opt in "${options[@]}" "Quit"; do
-    case "$REPLY" in
-    1 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dacplus";;
-    2 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dac";;
-    3 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-digi";;
-    4 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-amp";;
-    $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
-    *) echo "Invalid option. Try another one."; continue;;
-    esac
-done
-echo "$(cat $CNFFILE)$HIFIBERRY" > $CNFFILE
-if [ ! -f /boot/dietpi.txt ]; then
-sed -i '/#dtparam=audio=on/!s/dtparam=audio=on/#&/' /boot/config.txt # Add hashtag, disable internal audio/headphones.
-fi
-sed -i 's/^[ \t]*//' /boot/config.txt # Remove empty spaces infront of line.
-sed -i ':a; /^\n*$/{ s/\n//; N;  ba};' /boot/config.txt # Remove if two consecutive blank lines and replace with one in a file.
-sed -i '/Berry/{N;s/\n$//}' /boot/config.txt # Remove blank line after match.
-sed -i '${/^$/d}' /boot/config.txt # Remove last blank line in file.
-fi
-echo " "
-echo "--== Fix HDMI-audio setup ==--"
-echo -e "$INFO Configuring HDMI for Audio:"
-echo    "      If you do not have an audio-HAT, you might want to set HDMI as default for audio."
-echo    " "
-echo    "      WARNING!!!     WARNING!!!      WARNiNG!!!"
-echo    " "
-echo    "      Please only run this if you did not run the HiFiBerry HAT setup above,"
-echo    "      and are sure you want to change from Headphones to HDMI for audio out!"
-echo
-echo -n "Do you want to configure HDMI as default audio-output [y/N]: "
-read answer
-answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
-if [ "$answer" = "y" ]; then
-sed -i '/#hdmi_drive=2/s/^# *//' /boot/config.txt
+  echo " "
+  echo "Now you need to choose your HiFiBerry card, pick the number for the card you have, exit with 5."
+  sed -i /hifiberry-/d /boot/config.txt # Remove existing hiFiBerry config.
+  echo " " >> /boot/config.txt
+  grep -qxF '# --== Configuration for HiFi-Berry ==--' /boot/config.txt || echo '# --== Configuration for HiFi-Berry ==--' >> /boot/config.txt
+  echo " " >> /boot/config.txt
+  echo " "
+  title="Select your HiFiBerry card, exit with 5:"
+  prompt="Pick your option:"
+  options=("setup for DAC+ standard/pro" "setup for DAC/DAC+ Light" "setup for Digi/Digi+" "setup for Amp/Amp+")
+  echo "$title"
+  PS3="$prompt "
+  select opt in "${options[@]}" "Quit"; do
+      case "$REPLY" in
+      1 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dacplus";;
+      2 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dac";;
+      3 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-digi";;
+      4 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-amp";;
+      $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
+      *) echo "Invalid option. Try another one."; continue;;
+      esac
+  done
+  echo "$(cat $CNFFILE)$HIFIBERRY" > $CNFFILE
+  if [ ! -f /boot/dietpi.txt ]; then
+    sed -i '/#dtparam=audio=on/!s/dtparam=audio=on/#&/' /boot/config.txt # Add hashtag, disable internal audio/headphones.
+  fi
+  sed -i 's/^[ \t]*//' /boot/config.txt # Remove empty spaces infront of line.
+  sed -i ':a; /^\n*$/{ s/\n//; N;  ba};' /boot/config.txt # Remove if two consecutive blank lines and replace with one in a file.
+  sed -i '/Berry/{N;s/\n$//}' /boot/config.txt # Remove blank line after match.
+  sed -i '${/^$/d}' /boot/config.txt # Remove last blank line in file.
 fi
 echo " "
+#echo "--== Fix HDMI-audio setup ==--"
+#echo -e "$INFO Configuring HDMI for Audio:"
+#echo    "      If you do not have an audio-HAT, you might want to set HDMI as default for audio."
+#echo    " "
+#echo    "      WARNING!!!     WARNING!!!      WARNiNG!!!"
+#echo    " "
+#echo    "      Please only run this if you did not run the HiFiBerry HAT setup above,"
+#echo    "      and are sure you want to change from Headphones to HDMI for audio out!"
+#echo
+#echo -n "Do you want to configure HDMI as default audio-output [y/N]: "
+#read answer
+#answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+#if [ "$answer" = "y" ]; then
+#  sed -i '/#hdmi_drive=2/s/^# *//' /boot/config.txt
+#fi
+#echo " "
 echo "--== Cleanup for upgrade ==--"
 echo -n "Do you want to prep for upgrade to new version "$PLEXAMPV", only run if you are upgrading [y/N]: "
-read answer
+#read answer
 answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+answer=n
 if [ "$answer" = "y" ]; then
-ps ax |grep index.js |grep -v grep |awk '{print $1}' |xargs kill
-rm -rf /home/"$USER"/plexamp/
-rm -rf /home/"$USER"/Plexamp-Linux-arm64*
-rm -rf /home/"$USER"/.config/systemd/user/plexamp.service
+  ps ax |grep index.js |grep -v grep |awk '{print $1}' |xargs kill
+  rm -rf /home/"$USER"/plexamp/
+  rm -rf /home/"$USER"/Plexamp-Linux-arm64*
+  rm -rf /home/"$USER"/.config/systemd/user/plexamp.service
 fi
 echo " "
 echo "--== Install or upgrade ==--"
 echo -n "Do you want to install and configure Node.v12 and "$PLEXAMPV" [y/N]: "
-read answer
+#read answer
 answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+answer=y
 if [ "$answer" = "y" ]; then
-echo " "
-if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
-echo "--== Install node.v12 ==--"
-apt-mark unhold nodejs > /dev/null 2>&1
-apt-get purge -y nodejs > /dev/null 2>&1
-curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-apt-get install -y nodejs=12.22.*-1nodesource1
-apt-mark hold nodejs
-fi
+  echo " "
+  if [ ! -f /etc/apt/sources.list.d/nodesource.list ]; then
+    echo "--== Install node.v12 ==--"
+    apt-mark unhold nodejs > /dev/null 2>&1
+    apt-get purge -y nodejs > /dev/null 2>&1
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    apt-get install -y nodejs=12.22.*-1nodesource1
+    apt-mark hold nodejs
+  fi
 fi
 echo " "
 echo "--== Verify that node.v12 is set to hold ==--"
@@ -352,41 +355,50 @@ echo "--== Verify node.v12 and npm versions, should be "v12.22.*" and "6.14.16" 
 node -v ; npm -v
 echo " "
 if [ ! -f /home/"$USER"/plexamp/plexamp.service ]; then
-echo "--== Fetch, unpack and install "$PLEXAMPV" ==--"
-cd /home/"$USER"
-wget https://plexamp.plex.tv/headless/"$PLEXAMPV".tar.bz2
-chown -R "$USER":"$USER" /home/"$USER"/"$PLEXAMPV".tar.bz2
-tar -xf "$PLEXAMPV".tar.bz2
-mkdir -p /home/"$USER"/.local/share/Plexamp/Offline
-chown -R "$USER":"$USER" /home/"$USER"/plexamp/
-chown -R "$USER":"$USER" /home/"$USER"/.local/share/Plexamp/
-sed -i "s#Plexamp-Linux-.*#"$PLEXAMPV\""#g" /etc/update-motd.d/20-logo
+  echo "--== Fetch, unpack and install "$PLEXAMPV" ==--"
+  cd /home/"$USER"
+  wget https://plexamp.plex.tv/headless/"$PLEXAMPV".tar.bz2
+  chown -R "$USER":"$USER" /home/"$USER"/"$PLEXAMPV".tar.bz2
+  tar -xf "$PLEXAMPV".tar.bz2
+  mkdir -p /home/"$USER"/.local/share/Plexamp/Offline
+  chown -R "$USER":"$USER" /home/"$USER"/plexamp/
+  chown -R "$USER":"$USER" /home/"$USER"/.local/share/Plexamp/
+  sed -i "s#Plexamp-Linux-.*#"$PLEXAMPV\""#g" /etc/update-motd.d/20-logo
 fi
 echo "--== Fix plexamp.service ==--"
 if [ ! -f /home/"$USER"/.config/systemd/user/plexamp.service ]; then
-mkdir -p /home/"$USER"/.config/systemd/user/
-cp /home/"$USER"/plexamp/plexamp.service /home/"$USER"/.config/systemd/user/
-sed -i 's#multi-user#basic#g' /home/"$USER"/.config/systemd/user/plexamp.service
-sed -i '/User=pi/d' /home/"$USER"/.config/systemd/user/plexamp.service
-sed -i "s#/home/pi/plexamp/js/index.js#/home/"$USER"/plexamp/js/index.js#g" /home/"$USER"/.config/systemd/user/plexamp.service
-sed -i "s#WorkingDirectory=/home/pi/plexamp#WorkingDirectory=/home/"$USER"/plexamp#g" /home/"$USER"/.config/systemd/user/plexamp.service
-chown -R "$USER":"$USER" /home/"$USER"/.config/
-loginctl enable-linger "$USER"
-su "$USER" -c 'systemctl --user daemon-reload' > /dev/null 2>&1
+  mkdir -p /home/"$USER"/.config/systemd/user/
+  cp /home/"$USER"/plexamp/plexamp.service /home/"$USER"/.config/systemd/user/
+  sed -i 's#multi-user#basic#g' /home/"$USER"/.config/systemd/user/plexamp.service
+  sed -i '/User=pi/d' /home/"$USER"/.config/systemd/user/plexamp.service
+  sed -i "s#/home/pi/plexamp/js/index.js#/home/"$USER"/plexamp/js/index.js#g" /home/"$USER"/.config/systemd/user/plexamp.service
+  sed -i "s#WorkingDirectory=/home/pi/plexamp#WorkingDirectory=/home/"$USER"/plexamp#g" /home/"$USER"/.config/systemd/user/plexamp.service
+  chown -R "$USER":"$USER" /home/"$USER"/.config/
+  loginctl enable-linger "$USER"
+  su "$USER" -c 'systemctl --user daemon-reload' > /dev/null 2>&1
 fi
 echo " "
 echo "--== OS-update ==--"
 echo -n "Do you want to run full OS-update? This is recommended [y/N]: "
-read answer
+#read answer
 answer=`echo "$answer" | tr '[:upper:]' '[:lower:]'`
+answer=y
 if [ "$answer" = "y" ]; then
-echo " "
-echo "--== Perform OS-update ==--"
-apt update --allow-releaseinfo-change
-apt-get -y update ; apt-get -y upgrade ; apt-get -y dist-upgrade
-apt-get -y install deborphan > /dev/null 2>&1
-apt-get clean ; apt-get autoclean ; apt-get autoremove ; deborphan | xargs apt-get -y remove --purge
+  echo " "
+  echo "--== Perform OS-update ==--"
+  apt update --allow-releaseinfo-change
+  apt-get -y update ; apt-get -y upgrade ; apt-get -y dist-upgrade
+  apt-get -y install deborphan > /dev/null 2>&1
+  apt-get -y clean ; apt-get -y autoclean ; apt-get -y autoremove ; deborphan | xargs apt-get -y remove --purge
 fi
+cat >> /etc/sound.conf << EOF
+pcm.!default {
+  type hw card 0
+}
+ctl.!default {
+  type hw card 0
+}
+EOF
 echo " "
 echo "--== For Linux 5.4 and higher ==--"
 echo -e "$INFO This not needed for the "PiFi HIFI DiGi+ Digital Sound Card" found at:"
