@@ -399,6 +399,7 @@ ctl.!default {
   type hw card 0
 }
 EOF
+chown -R ${USER}:${USER} /home/${USER} 
 echo " "
 echo "--== For Linux 5.4 and higher ==--"
 echo -e "$INFO This not needed for the "PiFi HIFI DiGi+ Digital Sound Card" found at:"
