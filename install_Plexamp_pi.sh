@@ -214,7 +214,7 @@ if [ ! -d /home/"$USER" ]; then
   echo "--== Add user and enable sudo ==--"
   useradd -m -p "$PASSWORDCRYPTED" "$USER"
   usermod --shell /bin/bash "$USER" > /dev/null 2>&1
-  usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,lpadmin,spi,i2c,gpio "$USER"
+  usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,spi,i2c,gpio "$USER"
   if [ -d /home/pi ]; then
     echo " "
     echo "--== Disable default user "pi" from logging in ==--"
@@ -224,23 +224,23 @@ if [ ! -d /home/"$USER" ]; then
 fi
 echo " "
 echo "--== Set user-groups and enable sudo ==--"
-usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,lpadmin,spi,i2c,gpio "$USER"
+usermod -aG adm,dialout,cdrom,sudo,audio,video,plugdev,games,users,input,render,netdev,spi,i2c,gpio "$USER"
 echo " "
 echo "--== Update motd ==--"
 if [ ! -f /etc/update-motd.d/20-logo ]; then
-  cat >> /etc/update-motd.d/20-logo << 'EOF'
-  #!/bin/sh
-  echo    ""
-  echo    ""
-  echo    "   ██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ███╗   ███╗██████╗"
-  echo    "   ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗████╗ ████║██╔══██╗"
-  echo    "   ██████╔╝██║     █████╗   ╚███╔╝ ███████║██╔████╔██║██████╔"
-  echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██║╚██╔╝██║██╔═══╝"
-  echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
-  echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
-  echo    ""
-  echo    "   Plexamp-Linux-arm64-v4.2.2"
-  echo " "
+cat >> /etc/update-motd.d/20-logo << 'EOF'
+#!/bin/sh
+echo    ""
+echo    ""
+echo    "   ██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ███╗   ███╗██████╗"
+echo    "   ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗████╗ ████║██╔══██╗"
+echo    "   ██████╔╝██║     █████╗   ╚███╔╝ ███████║██╔████╔██║██████╔"
+echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██║╚██╔╝██║██╔═══╝"
+echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
+echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
+echo    ""
+echo    "   Plexamp-Linux-arm64-v4.2.2"
+echo " "
 EOF
   chmod +x /etc/update-motd.d/20-logo
 fi
