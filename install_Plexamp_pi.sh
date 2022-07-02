@@ -392,7 +392,7 @@ if [ "$answer" = "y" ]; then
   apt-get -y install deborphan > /dev/null 2>&1
   apt-get -y clean ; apt-get -y autoclean ; apt-get -y autoremove ; deborphan | xargs apt-get -y remove --purge
 fi
-cat >> /etc/sound.conf << EOF
+cat >> /etc/asound.conf << EOF
 pcm.!default {
   type hw card 0
 }
