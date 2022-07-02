@@ -297,6 +297,7 @@ if [ "$answer" = "y" ]; then
   if [ ! -f /boot/dietpi.txt ]; then
     sed -i '/#dtparam=audio=on/!s/dtparam=audio=on/#&/' /boot/config.txt # Add hashtag, disable internal audio/headphones.
   fi
+  grep -qxF 'force_eeprom_read=0' /boot/config.txt || echo 'force_eeprom_read=0' >> /boot/config.txt
   sed -i 's/^[ \t]*//' /boot/config.txt # Remove empty spaces infront of line.
   sed -i ':a; /^\n*$/{ s/\n//; N;  ba};' /boot/config.txt # Remove if two consecutive blank lines and replace with one in a file.
   sed -i '/Berry/{N;s/\n$//}' /boot/config.txt # Remove blank line after match.
