@@ -396,6 +396,11 @@ answer=y
 if [ "$answer" = "y" ]; then
   echo " "
   echo "--== Perform OS-update ==--"
+  echo " - holding network-manager -"
+  apt-mark hold network-manager
+  echo " - packages on hold: "  
+  apt-mark showhold
+  echo
   apt update --allow-releaseinfo-change
   apt-get -y update ; apt-get -y upgrade ; apt-get -y dist-upgrade
   apt-get -y install deborphan > /dev/null 2>&1
