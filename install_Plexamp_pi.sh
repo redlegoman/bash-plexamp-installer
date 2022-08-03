@@ -50,6 +50,7 @@ PASSWORD="MySecretPass123"                      # Default password
 CNFFILE="/boot/config.txt"                      # Default config file
 HOST="plexamppi"                                  # Default hostname
 PLEXAMPV="Plexamp-Linux-arm64-v4.2.2"    # Default Plexamp-version
+PLEXAMPV="Plexamp-Linux-headless-v4.3.0" # Default Plexamp-version
 SPACES="   "                                    # Default spaces
 
 
@@ -239,7 +240,7 @@ echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔�
 echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
 echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
 echo    ""
-echo    "   Plexamp-Linux-arm64-v4.2.2"
+echo    "   Plexamp-Linux-headless-v4.3.0"
 echo " "
 EOF
   chmod +x /etc/update-motd.d/20-logo
@@ -278,21 +279,28 @@ if [ "$answer" = "y" ]; then
   grep -qxF '# --== Configuration for HiFi-Berry ==--' /boot/config.txt || echo '# --== Configuration for HiFi-Berry ==--' >> /boot/config.txt
   echo " " >> /boot/config.txt
   echo " "
-  title="Select your HiFiBerry card, exit with 5:"
-  prompt="Pick your option:"
-  options=("setup for DAC+ standard/pro" "setup for DAC/DAC+ Light" "setup for Digi/Digi+" "setup for Amp/Amp+")
-  echo "$title"
-  PS3="$prompt "
-  select opt in "${options[@]}" "Quit"; do
-      case "$REPLY" in
-      1 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dacplus";;
-      2 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dac";;
-      3 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-digi";;
-      4 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-amp";;
-      $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
-      *) echo "Invalid option. Try another one."; continue;;
-      esac
-  done
+#  title="Select your HiFiBerry card, exit with 5:"
+#  prompt="Pick your option:"
+#  options=("setup for DAC+ standard/pro" "setup for DAC/DAC+ Light" "setup for Digi/Digi+" "setup for Amp/Amp+")
+#  echo "$title"
+#  PS3="$prompt "
+#  select opt in "${options[@]}" "Quit"; do
+#      case "$REPLY" in
+#      1 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dacplus";;
+#      2 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-dac";;
+#      3 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-digi";;
+#      4 ) echo "You picked $opt, continue with 5 or choose again!"; HIFIBERRY="dtoverlay=hifiberry-amp";;
+#      $(( ${#options[@]}+1 )) ) echo "Continuing!"; break;;
+#      *) echo "Invalid option. Try another one."; continue;;
+#      esac
+#  done
+  echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+  echo
+  echo "  automatically selecting setup for DAC+ standard/pro"
+  echo "            (dtoverlay=hifiberry-dacplus)"
+  echo
+  echo "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
+  HIFIBERRY="dtoverlay=hifiberry-dacplus"
   echo "$(cat $CNFFILE)$HIFIBERRY" > $CNFFILE
   if [ ! -f /boot/dietpi.txt ]; then
     sed -i '/#dtparam=audio=on/!s/dtparam=audio=on/#&/' /boot/config.txt # Add hashtag, disable internal audio/headphones.
@@ -328,7 +336,8 @@ answer=n
 if [ "$answer" = "y" ]; then
   ps ax |grep index.js |grep -v grep |awk '{print $1}' |xargs kill
   rm -rf /home/"$USER"/plexamp/
-  rm -rf /home/"$USER"/Plexamp-Linux-arm64*
+  #rm -rf /home/"$USER"/Plexamp-Linux-arm64*
+  rm -rf /home/"$USER"/Plexamp-Linux-*
   rm -rf /home/"$USER"/.config/systemd/user/plexamp.service
 fi
 echo " "
