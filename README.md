@@ -1,3 +1,21 @@
+# WARNING #
+
+This only works for me. It installs plexamp and sets things up for my Raspberry Pi running Raspberry Pi OS.
+I have a HiFiBerry Standard and want to run it as user "andy". It might work for you, who knows, but don't complain if it doesn't
+
+
+forked from https://github.com/odinb/bash-plexamp-installer
+
+
+
+
+
+
+
+
+
+
+
 # PlexAmp-installer for Raspberry Pi with ARM64 HW.
 
 For more information and hardware used, see here:<br /> https://github.com/odinb/bash-plexamp-installer/wiki
