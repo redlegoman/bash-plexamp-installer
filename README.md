@@ -20,7 +20,7 @@ forked from https://github.com/odinb/bash-plexamp-installer
 
 For more information and hardware used, see here:<br /> https://github.com/odinb/bash-plexamp-installer/wiki
 
-Currently installs/upgrades to: Plexamp Headless v4.2.2
+Currently installs/upgrades to: Plexamp-Linux-headless-v4.3.0
 
 ## Burning the image.
 Burn the OS-image to the Micro-SD card using Raspberry pi imager, etcher (or app of your choice).
