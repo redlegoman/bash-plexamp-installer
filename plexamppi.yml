@@ -9,7 +9,8 @@
     post_install_message: |
        Configuration post-reboot:
        Note !! Only needed if fresh install, not if upgrading. Tokens are preserved during upgrade.
-       After reboot, as your regular user please run the command:
+       After reboot, as your {{USER}} user please run the command:
+           ( su - {{USER}} )
            node /home/{{USER}}/plexamp/js/index.js
        At this point, go to the URL provided in response, and enter the claim token at prompt.
        Once entered, the web-GUI should be available on the {{inventory_hostname}}:32500 from a browser.
