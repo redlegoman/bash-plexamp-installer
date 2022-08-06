@@ -1,0 +1,203 @@
+---
+- hosts: "{{ variable_host | default('plexamppi')}}"
+  become: True
+  vars:
+    PLEXAMPV: Plexamp-Linux-arm64-v4.2.2
+    node_needs_installing: False
+    USER: plexamp
+
+    post_install_message: |
+       Configuration post-reboot:
+       Note !! Only needed if fresh install, not if upgrading. Tokens are preserved during upgrade.
+       After reboot, as your regular user please run the command:
+           node /home/{{USER}}/plexamp/js/index.js
+       At this point, go to the URL provided in response, and enter the claim token at prompt.
+       Once entered, the web-GUI should be available on the {{inventory_hostname}}:32500 from a browser.
+       On that GUI you will be asked to login to your Plex-acoount for security-reasons,
+       and then choose a librabry where to fetch/stream music from.
+       Now play some music! Or control it from any other instance of Plexamp.
+       Start and enable the Plexamp service if you feel like having it start on boot!
+       Hit ctrl+c to stop process, then enter:
+           systemctl restart plexamp.service
+       NOTE!! If you upgraded, only reboot is needed, tokens are preserved.
+       One can verify service after reboot with:
+           systemctl status plexamp.service
+       All should work at this point.
+      
+       Logs are located at: /home/{{USER}}/.cache/Plexamp/log/Plexamp.log"
+
+  tasks:
+
+    - name: ensure plexamp user exists
+      user:
+        name: plexamp
+        comment: "Plexamp"
+        shell: /bin/bash
+        state: present
+        createhome: yes
+        home: /home/plexamp
+        password: "$6$bAtJCKiqdNYrf7Hx$rTkXzWJUZlbTTjSsBLpVWIeK9CBxzVmCS/8/6iFRyRSSZKeHWb6m/Tqeug0ey8qNYudo3gQCUpU6txEf1iStE0"
+        update_password: always
+        groups: sudo,wheel,audio,video,plugdev,dialout,games,users,input,render,netdev,spi,i2c,gpio,adm,cdrom
+        append: yes
+
+
+    - name: install package list
+      package:
+        name: '{{ item }}'
+        state: present
+      with_items:
+        - alsa-utils
+        - rpi-eeprom
+
+    - name: get the apt package facts
+      package_facts:
+        manager: "auto"
+
+    - name: "Set variables"
+      set_fact:
+        node_version: "{{ ansible_facts.packages.nodejs[0].version }}"
+    - name: "more variables setting"
+      set_fact:
+        node_needs_installing: True
+      when: not node_version |regex_search('^(12.22).+(1nodesource1)$')
+    - name: show nodejs version
+      debug: var=node_version
+    - debug: 
+        msg: " !!!!!!!!!!!!!!!!!!!!!!!!!! installing new nodejs !!!!!!!!!!!!!!!!!!!!!!!"
+      when: node_needs_installing
+    - name: download node.12 setup
+      ansible.builtin.get_url:
+        url: https://deb.nodesource.com/setup_12.x
+        dest: /tmp/node.setup
+        mode: '0755'
+      when: node_needs_installing
+    - name: install node setup
+      command: /tmp/node.setup
+      register: result
+      when: node_needs_installing
+    - name: UNHold nodejs
+      dpkg_selections:
+        name: nodejs
+        selection: install
+      when: node_needs_installing
+    - name: install nodejs 12
+      package:
+        name: '{{ item }}'
+        state: present
+      with_items:
+        - nodejs=12.22.*-1nodesource1
+      when: node_needs_installing
+    - name: Hold nodejs
+      dpkg_selections:
+        name: nodejs
+        selection: hold
+      when: node_needs_installing
+
+    - name: Unarchive a file that needs to be downloaded (added in 2.0)
+      ansible.builtin.unarchive:
+        src: "https://plexamp.plex.tv/headless/{{PLEXAMPV}}.tar.bz2"
+        dest: "/home/{{USER}}"
+        remote_src: yes
+    - name: Change file ownership, group and permissions
+      ansible.builtin.file:
+        path: "/home/{{USER}}/plexamp"
+        owner: "{{USER}}"
+        group: "{{USER}}"
+    - name: create dir
+      ansible.builtin.file:
+        path: "/home/{{USER}}/.local/share/Plexamp/Offline"
+        state: directory
+        owner: "{{USER}}"
+        group: "{{USER}}"
+        mode: '0755'
+        recurse: True
+    - name: Change file ownership, group and permissions
+      ansible.builtin.file:
+        path: "/home/{{USER}}/.local/share/Plexamp/"
+        owner: "{{USER}}"
+        group: "{{USER}}"
+
+
+
+
+
+    - name: Create systemd service
+      copy:
+        dest: "/etc/systemd/system/plexamp.service"
+        content: |
+          [Unit]
+          Description=plexamp
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{USER}}
+          WorkingDirectory=/home/{{USER}}/plexamp
+          ExecStart=/usr/bin/node /home/{{USER}}/plexamp/js/index.js
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Just force systemd to reread configs (2.4 and above)
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Make sure a service unit is running
+      ansible.builtin.systemd:
+        state: started
+        name: plexamp
+        enabled: yes
+
+
+    - name: create logo in motd
+      copy:
+        dest: "/etc/update-motd.d/20-logo"
+        mode: '0755'
+        content: |
+          #!/bin/sh
+          echo    ""
+          echo    ""
+          echo    "   ██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ███╗   ███╗██████╗"
+          echo    "   ██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗████╗ ████║██╔══██╗"
+          echo    "   ██████╔╝██║     █████╗   ╚███╔╝ ███████║██╔████╔██║██████╔"
+          echo    "   ██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██║╚██╔╝██║██╔═══╝"
+          echo    "   ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║ ╚═╝ ██║██║"
+          echo    "   ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝"
+          echo    ""
+          echo    "   Plexamp-Linux-headless-v4.3.0"
+          echo " "
+
+    - name: add hifiberry to config.txt
+      ansible.builtin.lineinfile:
+        path: /boot/config.txt
+        line: 'dtoverlay=hifiberry-dacplus'
+    - name: remove line
+      ansible.builtin.lineinfile:
+        path: /boot/config.txt
+        regexp: '^dtparam=audio=on'
+        line: '#dtparam=audio=on'
+    - name: add another line
+      ansible.builtin.lineinfile:
+        path: /boot/config.txt
+        line: 'force_eeprom_read=0'
+    - name: add another line (test)
+      ansible.builtin.lineinfile:
+        path: /boot/config.txt
+        line: '#XXXX'
+
+
+    - name: add lines to /etc/asound.conf
+      copy:
+        dest: "/etc/asound.conf"
+        content: |
+          pcm.!default {
+            type hw card 0
+          }
+          ctl.!default {
+            type hw card 0
+          }
+
+    - name: post install message
+      debug: msg={{ post_install_message.split('\n') }}
